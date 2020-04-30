@@ -69,11 +69,4 @@ abstract class QuickCheckHeap extends Properties("Heap") with IntHeap {
       val values = extractAll(h, Nil)
       values == values.sorted
     }}
-
-  property("melding should be commutative") = 
-    forAll { (h1: H, h2: H) =>
-
-      meld(h1, h2) == meld(h2, h1)
-    }
-
 }
