@@ -18,10 +18,10 @@ abstract class QuickCheckHeap extends Properties("Heap") with IntHeap {
   implicit lazy val arbHeap: Arbitrary[H] = Arbitrary(genHeap)
 
   property("Reinserting the minimum and finding it should return fine") = 
-    forAll { (h: H) =>
-      val m = if (isEmpty(h)) 0 else findMin(h)
+    forAll { (h: H) => (!isEmpty(h)) ==> {
+      val m = findMin(h)
       findMin(insert(m, h)) == m
-    }
+    }}
 
   property("Inserting an element in an empty heap and retrieving it returns fine") = 
     forAll { a: Int =>
@@ -55,7 +55,7 @@ abstract class QuickCheckHeap extends Properties("Heap") with IntHeap {
 
       min_both == min1 || min_both == min2
     }}
-    
+
   property("Recursively getting and deleting obtains a sorted sequence") = 
     forAll { (h: H) => (!isEmpty(h)) ==> {
 
@@ -69,5 +69,11 @@ abstract class QuickCheckHeap extends Properties("Heap") with IntHeap {
       val values = extractAll(h, Nil)
       values == values.sorted
     }}
+
+  property("melding should be commutative") = 
+    forAll { (h1: H, h2: H) =>
+
+      meld(h1, h2) == meld(h2, h1)
+    }
 
 }
