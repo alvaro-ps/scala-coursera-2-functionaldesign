@@ -15,6 +15,13 @@ abstract class QuickCheckHeap extends Properties("Heap") with IntHeap {
     } yield insert(k, h)
   )
 
+  def extractAll(heap: H, all_values: List[A]): List[A] =
+    if (isEmpty(heap)) all_values
+    else {
+      val min_val = findMin(heap)
+      extractAll(deleteMin(heap), all_values ++ List(min_val))
+    }
+
   implicit lazy val arbHeap: Arbitrary[H] = Arbitrary(genHeap)
 
   property("Reinserting the minimum and finding it should return fine") = 
@@ -59,13 +66,6 @@ abstract class QuickCheckHeap extends Properties("Heap") with IntHeap {
   property("Recursively getting and deleting obtains a sorted sequence") = 
     forAll { (h: H) => (!isEmpty(h)) ==> {
 
-      def extractAll(heap: H, all_values: List[A]): List[A] =
-        if (isEmpty(heap)) all_values
-        else {
-          val min_val = findMin(heap)
-          extractAll(deleteMin(heap), all_values ++ List(min_val))
-        }
-
       val values = extractAll(h, Nil)
       values == values.sorted
     }}
@@ -81,8 +81,16 @@ abstract class QuickCheckHeap extends Properties("Heap") with IntHeap {
       min1 == min2
     }
 
- property("Melding two empty heaps should return empty") = meld(empty, empty) == empty
+  property("Melding two empty heaps should return empty") = meld(empty, empty) == empty
 
- property("Melding any heap with an empty one should return the original") =
+  property("Melding any heap with an empty one should return the original") =
     forAll { (h: H) => meld(h, empty) == h }
+
+  property("Inserting an element and then extracting all, the inserted element is in the list") =
+    forAll { (h: H, x: Int) => 
+      val new_h = insert(x, h)
+      val all_elements = extractAll(new_h, Nil)
+
+      all_elements.contains(x)
+    }
 }
