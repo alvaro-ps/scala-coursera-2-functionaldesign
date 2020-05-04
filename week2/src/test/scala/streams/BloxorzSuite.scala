@@ -58,6 +58,10 @@ class BloxorzSuite {
       assertEquals(Pos(1, 1), startPos)
     }
 
+  @Test def `start block standing`: Unit =
+    new Level1 {
+      assertEquals(startBlock.isStanding, true)
+    }
 
   @Test def `optimal solution for level 1 (5pts)`: Unit =
     new Level1 {
