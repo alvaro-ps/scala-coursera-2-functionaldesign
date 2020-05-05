@@ -65,19 +65,31 @@ trait Solver extends GameDef {
    */
   def from(initial: LazyList[(Block, List[Move])],
            explored: Set[Block]): LazyList[(Block, List[Move])] = {
-    
+    println(s"From $initial, $explored")
+    for {
+      (block, moves) <- initial
+      (neighbor, more_moves) <- newNeighborsOnly(neighborsWithHistory(block, moves), explored)
+      (new_block, new_moves) <- from((neighbor, more_moves) #:: initial, explored + neighbor)
+    } yield (new_block, new_moves)
   }
+
+
 
   /**
    * The lazy list of all paths that begin at the starting block.
    */
-  lazy val pathsFromStart: LazyList[(Block, List[Move])] = ???
+  lazy val pathsFromStart: LazyList[(Block, List[Move])] = LazyList((startBlock, Nil))
 
   /**
    * Returns a lazy list of all possible pairs of the goal block along
    * with the history how it was reached.
    */
-  lazy val pathsToGoal: LazyList[(Block, List[Move])] = ???
+  lazy val pathsToGoal: LazyList[(Block, List[Move])] = LazyList(
+      (Block(goal, goal), List(Up)),
+      (Block(goal, goal), List(Down)),
+      (Block(goal, goal), List(Right)),
+      (Block(goal, goal), List(Left)),
+    )
 
   /**
    * The (or one of the) shortest sequence(s) of moves to reach the
@@ -87,5 +99,11 @@ trait Solver extends GameDef {
    * the first move that the player should perform from the starting
    * position.
    */
-  lazy val solution: List[Move] = ???
+  lazy val solution: List[Move] = {
+    lazy val solutions = for {
+      (block, moves) <- from(pathsFromStart, Set(startBlock))
+      if (pathsToGoal.contains((block, moves.head)))
+    } yield moves.reverse
+    solutions.head
+  }
 }
