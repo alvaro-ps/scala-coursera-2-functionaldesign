@@ -209,7 +209,9 @@ trait DecoderInstances {
     */
   implicit def listDecoder[A](implicit decoder: Decoder[A]): Decoder[List[A]] =
     Decoder.fromFunction {
-      ???
+      case Json.Arr(items) => {
+        items map decoder.decode
+      }
     }
 
   /**
@@ -217,7 +219,9 @@ trait DecoderInstances {
     * the supplied `name` using the given `decoder`.
     */
   def field[A](name: String)(implicit decoder: Decoder[A]): Decoder[A] =
-    ???
+    Decoder.fromFunction {
+      case Json.Obj(fields) => fields map {case (string, json) => (string, decoder.decode(json))}
+    }
 
 }
 
