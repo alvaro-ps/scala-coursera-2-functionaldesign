@@ -225,13 +225,16 @@ trait DecoderInstances {
     * A decoder for JSON objects. It decodes the value of a field of
     * the supplied `name` using the given `decoder`.
     */
-  def field[A](name: String)(implicit decoder: Decoder[A]): Decoder[A] = ???
-  """
+  def field[A](name: String)(implicit decoder: Decoder[A]): Decoder[A] = 
     Decoder.fromFunction {
-      case Json.Obj(fields) => fields map {case (string, json) => (string, decoder.decode(json))}
+      case Json.Obj(fields) => {
+        fields.get(name) match {
+          case Some(value) => decoder.decode(value)
+          case None => None
+        }
+      }
+      case _ => None
     }
-  """
-
 }
 
 case class Person(name: String, age: Int)
