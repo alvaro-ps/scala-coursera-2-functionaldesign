@@ -250,9 +250,11 @@ trait PersonCodecs {
       .transform[Person](user => (user.name, user.age))
 
   /** The corresponding decoder for `Person` */
-  implicit val personDecoder: Decoder[Person] =
-    ???
-
+  implicit val personDecoder: Decoder[Person] = {
+    Decoder.field[String]("name").zip(Decoder.field[Int]("age")).transform[Person] { 
+      case (name, age) => Person(name, age)
+    }
+  }
 }
 
 case class Contacts(people: List[Person])
