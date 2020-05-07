@@ -189,7 +189,9 @@ trait DecoderInstances {
 
   /** A decoder for `Int` values. Hint: use the `isValidInt` method of `BigDecimal`. */
   implicit val IntDecoder: Decoder[Int] =
-    Decoder.fromPartialFunction { case Json.Num(n) => n.toInt }
+    Decoder.fromPartialFunction { 
+      case Json.Num(n) if n.isValidInt => n.toInt
+    }
   // TODO Define an implicit value of type `Decoder[Int]`
 
   /** A decoder for `String` values */
@@ -207,21 +209,28 @@ trait DecoderInstances {
     * using the given `decoder`. The resulting decoder succeeds only
     * if all the JSON array items are successfully decoded.
     */
-  implicit def listDecoder[A](implicit decoder: Decoder[A]): Decoder[List[A]] =
+
+  implicit def listDecoder[A](implicit decoder: Decoder[A]): Decoder[List[A]] = {
     Decoder.fromFunction {
       case Json.Arr(items) => {
-        items map decoder.decode
+        val decoded = items map decoder.decode
+        if (decoded.forall(_.isDefined)) Some(decoded.map(_.get))
+        else None
       }
+      case _ => None
     }
+  }
 
   /**
     * A decoder for JSON objects. It decodes the value of a field of
     * the supplied `name` using the given `decoder`.
     */
-  def field[A](name: String)(implicit decoder: Decoder[A]): Decoder[A] =
+  def field[A](name: String)(implicit decoder: Decoder[A]): Decoder[A] = ???
+  """
     Decoder.fromFunction {
       case Json.Obj(fields) => fields map {case (string, json) => (string, decoder.decode(json))}
     }
+  """
 
 }
 
