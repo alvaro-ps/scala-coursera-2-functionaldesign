@@ -12,8 +12,8 @@ object Polynomial extends PolynomialInterface {
       c: Signal[Double], delta: Signal[Double]): Signal[Set[Double]] = {
     Signal(
       if (delta() < 0) Set()
-      else if (delta() == 0) Set(-b()/2*a())
-      else Set((-b() + sqrt(delta()))/2*a(), (-b() - sqrt(delta()))/2*a())
+      else if (delta() == 0) Set(-b()/(2*a()))
+      else Set((-b() + sqrt(delta()))/(2*a()), (-b() - sqrt(delta()))/(2*a()))
     )
   }
 }
